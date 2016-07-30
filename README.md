@@ -13,6 +13,24 @@ Options:
   --help               Show this message and exit.
 ```
 
+### Install
+
+Via pip:
+
+```console
+pip install gosuticker
+# or
+pip istall git+https://github.com/Granitas/gosuticker.git
+```
+
+Or 
+
+```console
+git clone https://github.com/Granitas/gosuticker.git
+cd gosuticker
+python3 setup.py install
+```
+
 ### Examples
 
 Simply supply game name as first argument
