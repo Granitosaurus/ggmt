@@ -25,7 +25,7 @@ El_one vs TBE in 3m 38s
 Elements. vs Sweet. in 1w 2h
 ```
 
-You can use full custom jinja2 template (see --help-template for template keys)
+You can use a full custom jinja2 template (see --help-template for template keys)
 
 ```console
 $ gosuticker dota2 --template "{{opp1_country_short}} vs {{opp2_country}} in {{time_secs/60}} minutes"
