@@ -73,3 +73,7 @@ $ export PUSHBULLET_API=<api_key>
 $ gosuticker notify dota2 na`vi --seconds 0 --pushbullet
 ```
 
+Probably want to add this to your crontab, to run continuesly:
+```cron
+*/30 * * * * /usr/bin/gosuticker notify dota2 na`vi --minutes 5
+```
