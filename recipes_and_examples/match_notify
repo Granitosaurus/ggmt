@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 import os
 import subprocess
 import click
@@ -27,6 +28,7 @@ with open(HISTORY_LOCATION, 'a') as f:  # make sure history file exists
 @click.option('--pushbullet-key', help='Pushbullet API key to use to send the notification, '
                                        'can be set through enviroment variable PUSHBULLET_API')
 def cli(game, team, seconds, pushbullet, pushbullet_key):
+    team = team.lower()
     if pushbullet:
         if not pushbullet_key:
             pushbullet_key = os.environ.get('PUSHBULLET_API', '')
@@ -41,27 +43,26 @@ def cli(game, team, seconds, pushbullet, pushbullet_key):
                        ' pip install pushbullet.py', err=True)
             return
 
-    template = '{{id}} @ {{opp1}} vs {{opp2}} in {{time}} @ {{time_secs}} @ {{url}}'
-    matches = subprocess.check_output(['gosuticker', game, '--template', template]).splitlines()
-    for line in matches:
-        match_id, line, match_seconds, url = line.decode('utf-8').split(' @ ')
-        if int(match_seconds) > int(seconds):
+    matches = json.loads(subprocess.check_output(['gosuticker', game, '--json']))
+    for match in matches:
+        if int(match['time_secs']) > int(seconds):
             continue
-        if team.lower() in line.lower():
+        if team == match['opp1'].lower() or team == match['opp2'].lower():
             # already in history?
             with open(HISTORY_LOCATION, 'r') as f:
-                if match_id in f.read():
+                if match['id'] in f.read():
                     continue
             # notify
-            click.echo(' @ '.join([line, url]))
+            title = "{} vs {} in {}".format(match['opp1'], match['opp2'], match['time'])
+            body = match['url']
             if pushbullet:
                 push = Pushbullet(pushbullet_key)
-                push.push_note(line, url)
+                push.push_note(title, body)
             else:
-                subprocess.Popen(['notify-send', line, url])
+                subprocess.Popen(['notify-send', title, body])
             # add to history
             with open(HISTORY_LOCATION, 'a') as f:
-                f.write('{}\n'.format(match_id))
+                f.write('{}\n'.format(match['id']))
 
 if __name__ == '__main__':
     cli()
