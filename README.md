@@ -32,8 +32,7 @@ python3 setup.py install
 
 ### Ticker  
 
-Matchticker that prints out upcoming/ongoing match data.   
-Prints data to stdout in template-customizable text or json
+Matchticker that prints out upcoming/ongoing match data. Prints data to stdout in template-customizable text or json
 
 *examples:*  
 Simply supply game name as first argument
@@ -61,18 +60,17 @@ RO vs Poland in 179.0 minutes
 
 ### Notifier
 
-Notify when a match with a specific team playing is about to   
-start using system notify or pushbullet service.  
-_Important_: notification history is stored in ~/.gosuticker_history to prevent flooding.
+Notify when a match with a specific team playing is about to start using system notify or pushbullet service.  
+**_Important_**: notification history is stored in `~/.gosuticker_history` to prevent flooding.
 
 Notify 30 minutes before game starts
 ```console
-gosuticker notify dota2 na`vi --minutes 30
+$ gosuticker notify dota2 na`vi --minutes 30
 ```
 
 Notify via pushbullet when live
 ```console
-export PUSHBULLET_API=<api_key>
-gosuticker notify dota2 na`vi --seconds 0 --pushbullet
+$ export PUSHBULLET_API=<api_key>
+$ gosuticker notify dota2 na`vi --seconds 0 --pushbullet
 ```
 
