@@ -1,6 +1,5 @@
 import json
 import os
-import string
 import subprocess
 
 from jinja2 import Template
@@ -16,6 +15,7 @@ with open(HISTORY_LOCATION, 'a') as f:  # make sure history file exists
 
 
 @click.group()
+@click.version_option()
 def cli():
     pass
 
@@ -26,9 +26,8 @@ def list_games():
         click.echo(game)
 
 
-@cli.command('tick', help='print matchticker')
-@click.version_option()
-@click.argument('game', required=False)
+@cli.command('tick', help='display matchticker')
+@click.argument('game')
 @click.option('-t', '--template', help='set template')
 @click.option('--json', 'is_json', help='output json', is_flag=True)
 @click.option('--help-template', help='print help message for how to format template', is_flag=True)
@@ -87,7 +86,6 @@ def notify(game, team, seconds, minutes, pushbullet, pushbullet_key):
 
     if minutes:
         seconds = minutes * 60
-        print(seconds)
     matches = GosuTicker(game).download_matches()
     for match in matches:
         if int(match['time_secs']) > int(seconds):
