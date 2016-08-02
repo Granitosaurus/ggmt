@@ -1,3 +1,5 @@
+import json
+
 from jinja2 import Template
 import click
 
@@ -11,9 +13,10 @@ DEFAULT_TEMPLATE = "{{opp1}} vs {{opp2}} in {{time}}"
 @click.version_option()
 @click.argument('game', required=False)
 @click.option('-t', '--template', help='set template')
+@click.option('--json', 'is_json', help='output json', is_flag=True)
 @click.option('--list-games', help='list supported games', is_flag=True)
 @click.option('--help-template', help='print help message for how to format template', is_flag=True)
-def cli(game, list_games, template, help_template):
+def cli(game, list_games, template, help_template, is_json, is_csv):
     if help_template:
         click.echo('Gosuticker is using Jinja2 templating engine')
         click.echo('default template: "{}"'.format(DEFAULT_TEMPLATE))
@@ -30,10 +33,13 @@ def cli(game, list_games, template, help_template):
     if game not in GosuTicker.games:
         click.echo('Unknown game "{}", see --list-games for available'.format(game), err=True)
         return
-    template = template or DEFAULT_TEMPLATE
-    template = Template(template)
     ticker = GosuTicker(game)
     matches = ticker.download_matches()
+    if is_json:
+        click.echo(json.dumps(list(matches), indent=2, sort_keys=True))
+        return
+    template = template or DEFAULT_TEMPLATE
+    template = Template(template)
     for m in matches:
         for k, v in m.items():
             locals()[k] = v
