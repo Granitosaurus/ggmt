@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='gosuticker',
-    version='0.2',
+    version='0.21',
     packages=['gosuticker'],
     url='https://github.com/Granitas/gosuticker',
     license='GPLV3+',
