@@ -27,11 +27,11 @@ def list_games():
 
 
 @cli.command('tick', help='display matchticker')
-@click.argument('game')
+@click.argument('game', required=False)
 @click.option('-t', '--template', help='set template')
 @click.option('--json', 'is_json', help='output json', is_flag=True)
 @click.option('--help-template', help='print help message for how to format template', is_flag=True)
-def tick(game, template, help_template, is_json, is_csv):
+def tick(game, template, help_template, is_json):
     if help_template:
         click.echo('Gosuticker is using Jinja2 templating engine')
         click.echo('default template: "{}"'.format(DEFAULT_TEMPLATE))
