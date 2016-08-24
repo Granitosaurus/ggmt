@@ -1,5 +1,9 @@
 # Gosuticker
-Is a template-based matchticker based on data displayed on gosugamers.com website
+
+[![PyPi version](https://img.shields.io/pypi/v/gosuticker.svg?style=flat-square)](https://pypi.python.org/pypi/gosuticker)
+[![PyPi license](https://img.shields.io/pypi/l/gosuticker.svg?style=flat-square)](https://pypi.python.org/pypi/gosuticker)
+[![PyPi license](https://img.shields.io/pypi/pyversions/gosuticker.svg?style=flat-square)](https://pypi.python.org/pypi/gosuticker)   
+A template-based matchticker based on data displayed on gosugamers.com website
 
 ```console
 Usage: gosuticker [OPTIONS] COMMAND [ARGS]...
