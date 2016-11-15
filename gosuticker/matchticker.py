@@ -53,12 +53,26 @@ class GosuTicker:
             item['game'] = next((g for g in self.games if g in item['url'].lower()))
             item['time'] = xpath("td[@class='status']/span/text()")
             item['time_secs'] = parse_time(item['time'])
-            item['opp1'] = xpath(".//span[contains(@class,'opp1')]/span/text()")
-            item['opp1_country'] = xpath(".//span[contains(@class,'opp1')]/span[contains(@class,'flag')]/@title")
-            item['opp1_country_short'] = xpath(".//span[contains(@class,'opp1')]"
-                                               "/span[contains(@class,'flag')]/@class").split()[-1]
-            item['opp2'] = xpath(".//span[contains(@class,'opp2')]/span/text()")
-            item['opp2_country'] = xpath(".//span[contains(@class,'opp2')]/span[contains(@class,'flag')]/@title")
-            item['opp2_country_short'] = xpath(".//span[contains(@class,'opp2')]"
-                                               "/span[contains(@class,'flag')]/@class").split()[-1]
+            item['t1'] = xpath(".//span[contains(@class,'opp1')]/span/text()")
+            item['t1_country'] = xpath(".//span[contains(@class,'opp1')]/span[contains(@class,'flag')]/@title")
+            item['t1_country_short'] = xpath(".//span[contains(@class,'opp1')]"
+                                             "/span[contains(@class,'flag')]/@class").split()[-1]
+            item['t2'] = xpath(".//span[contains(@class,'opp2')]/span/text()")
+            item['t2_country'] = xpath(".//span[contains(@class,'opp2')]/span[contains(@class,'flag')]/@title")
+            item['t2_country_short'] = xpath(".//span[contains(@class,'opp2')]"
+                                             "/span[contains(@class,'flag')]/@class").split()[-1]
+            if not item['time_secs']:
+                resp = requests.get(item['url'])
+                sel_detailed = Selector(text=resp.text)
+                item['stream'] = sel_detailed.xpath("//div[@class='matches-streams']"
+                                                    "/span[.//a[re:test(text(),'english', 'i')]]"
+                                                    "//iframe/@src").extract_first()
+                item['stream'] = self.clean_stream_url(item['stream'])
             yield item
+
+    @staticmethod
+    def clean_stream_url(url):
+        url = url.split('?', 1)[0]
+        url = url.replace('#!/embed/', '')
+        url = url.replace('//embed.', '//')
+        return url

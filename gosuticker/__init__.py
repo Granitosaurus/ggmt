@@ -5,12 +5,13 @@ class Match(dict):
         'game',
         'time',
         'time_secs',
-        'opp1',
-        'opp1_country',
-        'opp1_country_short',
-        'opp2',
-        'opp2_country',
-        'opp2_country_short',
+        't1',
+        't1_country',
+        't1_country_short',
+        't2',
+        't2_country',
+        't2_country_short',
+        'stream',
     ]
 
     def __setitem__(self, key, value):

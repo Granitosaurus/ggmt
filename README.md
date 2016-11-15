@@ -47,7 +47,7 @@ Elements. vs Sweet. in 1w 2h
 You can use a full custom jinja2 template (see --help-template for template keys)
 
 ```console
-$ gosuticker tick dota2 --template "{{opp1_country_short}} vs {{opp2_country}} in {{time_secs/60}} minutes"
+$ gosuticker tick dota2 --template "{{t1_country_short}} vs {{t2_country}} in {{time_secs/60}} minutes"
 RS vs Europe in 0.0 minutes
 RU vs Russian Federation in 0.0 minutes
 CN vs Malaysia in 0.0 minutes

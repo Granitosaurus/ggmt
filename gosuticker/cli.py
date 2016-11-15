@@ -2,13 +2,17 @@ import json
 import os
 import subprocess
 
+import re
+
+import sys
+from requests.exceptions import ConnectionError
 from jinja2 import Template
 import click
 
 from gosuticker import Match
 from gosuticker.matchticker import GosuTicker
 
-DEFAULT_TEMPLATE = "{{opp1}} vs {{opp2}} in {{time}}"
+DEFAULT_TEMPLATE = "{{t1}} vs {{t2}} in {{time}} {% if stream %}@ {{stream}}{% endif %}"
 HISTORY_LOCATION = os.path.expanduser('~/.gosuticker_history')
 with open(HISTORY_LOCATION, 'a') as f:  # make sure history file exists
     pass
@@ -44,22 +48,24 @@ def tick(game, template, help_template, is_json):
     if game not in GosuTicker.games:
         click.echo('Unknown game "{}", see --list-games for available'.format(game), err=True)
         return
-    ticker = GosuTicker(game)
-    matches = ticker.download_matches()
+    try:
+        matches = GosuTicker(game).download_matches()
+    except ConnectionError:
+        sys.exit('ERROR: No internet connection')
     if is_json:
         click.echo(json.dumps(list(matches), indent=2, sort_keys=True))
         return
     template = template or DEFAULT_TEMPLATE
     template = Template(template)
     for m in matches:
-        for k, v in m.items():
-            locals()[k] = v
-        click.echo(template.render(locals()))
+        click.echo(template.render(m))
 
 
 @cli.command('notify', help='notify if a specific team plays')
 @click.argument('game')
 @click.argument('team')
+@click.option('-f', '--force', is_flag=True,
+              help='ignore history')
 @click.option('-s', '--seconds', default=900,
               help='seconds threshold before sending out the notification (default=900)')
 @click.option('-m', '--minutes', default=0,
@@ -67,8 +73,8 @@ def tick(game, template, help_template, is_json):
 @click.option('-p', '--pushbullet', is_flag=True,
               help='Use pushbullet notification instead system notify-send')
 @click.option('-k', '--pushbullet-key', help='Pushbullet API key to use to send the notification, '
-                                       'can be set through enviroment variable PUSHBULLET_API')
-def notify(game, team, seconds, minutes, pushbullet, pushbullet_key):
+                                             'can be set through enviroment variable PUSHBULLET_API')
+def notify(game, team, seconds, minutes, pushbullet, pushbullet_key, force):
     team = team.lower().strip()
     if pushbullet:
         if not pushbullet_key:
@@ -86,17 +92,22 @@ def notify(game, team, seconds, minutes, pushbullet, pushbullet_key):
 
     if minutes:
         seconds = minutes * 60
-    matches = GosuTicker(game).download_matches()
+    try:
+        matches = GosuTicker(game).download_matches()
+    except ConnectionError:
+        sys.exit('ERROR: No internet connection')
+    re_team = re.compile(team, flags=re.I)
     for match in matches:
         if int(match['time_secs']) > int(seconds):
             continue
-        if team == match['opp1'].lower() or team == match['opp2'].lower():
+        if re_team.match(match['t1']) or re_team.match(match['t2']):
             # already in history?
-            with open(HISTORY_LOCATION, 'r') as f:
-                if match['id'] in f.read():
-                    continue
+            if not force:
+                with open(HISTORY_LOCATION, 'r') as f:
+                    if match['id'] in f.read():
+                        continue
             # notify
-            title = "{} vs {} in {}".format(match['opp1'], match['opp2'], match['time'])
+            title = "{} vs {} in {}".format(match['t1'], match['t2'], match['time'])
             body = match['url']
             if pushbullet:
                 push = Pushbullet(pushbullet_key)
