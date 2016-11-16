@@ -35,7 +35,7 @@ python3 setup.py install
 
 ### Ticker  
 
-Matchticker that prints out upcoming/ongoing match data. Prints data to stdout in template-customizable text or json
+Matchticker that prints out upcoming/ongoing match data. Prints data to stdout in text or json. Text can be customized by using jinja2 templates.
 
 *examples:*  
 Simply supply game name as first argument
@@ -63,8 +63,8 @@ RO vs Poland in 179.0 minutes
 
 ### Notifier
 
-Notify when a match with a specific team playing is about to start using system notify or pushbullet service.  
-**_Important_**: notification history is stored in `~/.gosuticker_history` to prevent flooding.
+Notify when a match with a specific team playing is about to start using system notify or pushbullet service. Argument `team` is a case insensitive regular expressions fielda.  
+**_Important_**: notification history is stored in `~/.gosuticker_history` to prevent flooding. You can ignore history with a -f/--force flag
 
 Notify 30 minutes before game starts
 ```console
