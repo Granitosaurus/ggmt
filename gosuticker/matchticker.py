@@ -42,6 +42,8 @@ class GosuTicker:
 
     def download_matches(self):
         resp = requests.get(self.game_url)
+        if resp.status_code != 200:
+            raise ConnectionRefusedError('Got response error {}'.format(resp.status_code))
         sel = Selector(text=resp.text)
         return self.find_matches(sel)
 

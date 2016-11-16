@@ -18,6 +18,15 @@ with open(HISTORY_LOCATION, 'a') as f:  # make sure history file exists
     pass
 
 
+def download_matches(game):
+    try:
+        matches = GosuTicker(game).download_matches()
+    except ConnectionError:
+        sys.exit('ERROR: No internet connection')
+    except ConnectionRefusedError as e:
+        sys.exit('Cannot connect to gosugamers: {}'.format(e.args[-1]))
+    return matches
+
 @click.group()
 @click.version_option()
 def cli():
@@ -49,10 +58,7 @@ def tick(game, template, help_template, is_json):
     if game not in GosuTicker.games:
         click.echo('Unknown game "{}", see "gosuticker list" for game list'.format(game), err=True)
         return
-    try:
-        matches = GosuTicker(game).download_matches()
-    except ConnectionError:
-        sys.exit('ERROR: No internet connection')
+    matches = download_matches(game)
     if is_json:
         click.echo(json.dumps(list(matches), indent=2, sort_keys=True))
         return
@@ -93,10 +99,7 @@ def notify(game, team, seconds, minutes, pushbullet, pushbullet_key, force):
 
     if minutes:
         seconds = minutes * 60
-    try:
-        matches = GosuTicker(game).download_matches()
-    except ConnectionError:
-        sys.exit('ERROR: No internet connection')
+    matches = download_matches(game)
     re_team = re.compile(team, flags=re.I)
     for match in matches:
         if int(match['time_secs']) > int(seconds):
