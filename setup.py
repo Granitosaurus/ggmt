@@ -12,7 +12,8 @@ setup(
     install_requires=[
         'click',
         'requests',
-        'parsel'
+        'parsel',
+        'jinja2'
     ],
     entry_points="""
         [console_scripts]

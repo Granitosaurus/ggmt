@@ -13,6 +13,8 @@ def parse_time(text):
         return 0
     text = text.strip().lower()
     seconds = 0
+    seconds += int((re.findall('(\d+)w', text) or [0])[0]) * 3600 * 24 * 7
+    seconds += int((re.findall('(\d+)d', text) or [0])[0]) * 3600 * 24
     seconds += int((re.findall('(\d+)h', text) or [0])[0]) * 3600
     seconds += int((re.findall('(\d+)m', text) or [0])[0]) * 60
     return seconds

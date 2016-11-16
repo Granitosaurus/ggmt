@@ -1,18 +1,18 @@
 import json
 import os
-import subprocess
-
 import re
-
+import subprocess
 import sys
-from requests.exceptions import ConnectionError
-from jinja2 import Template
+
 import click
+from jinja2 import Template
+from requests.exceptions import ConnectionError
 
 from gosuticker import Match
 from gosuticker.matchticker import GosuTicker
 
 DEFAULT_TEMPLATE = "{{t1}} vs {{t2}} in {{time}} {% if stream %}@ {{stream}}{% endif %}"
+DEFAULT_TEMPLATE_ALL = "{{game}}: {{t1}} vs {{t2}} in {{time}} {% if stream %}@ {{stream}}{% endif %}"
 HISTORY_LOCATION = os.path.expanduser('~/.gosuticker_history')
 with open(HISTORY_LOCATION, 'a') as f:  # make sure history file exists
     pass
@@ -38,7 +38,8 @@ def list_games():
 def tick(game, template, help_template, is_json):
     if help_template:
         click.echo('Gosuticker is using Jinja2 templating engine')
-        click.echo('default template: "{}"'.format(DEFAULT_TEMPLATE))
+        click.echo('default template for individual games: "{}"'.format(DEFAULT_TEMPLATE))
+        click.echo('default template for all: "{}"'.format(DEFAULT_TEMPLATE_ALL))
         click.echo('template keys:')
         for k in Match.keys:
             click.echo('    {}'.format(k))
@@ -46,7 +47,7 @@ def tick(game, template, help_template, is_json):
     if not game:
         raise click.BadParameter('Missing required parameter "game"')
     if game not in GosuTicker.games:
-        click.echo('Unknown game "{}", see --list-games for available'.format(game), err=True)
+        click.echo('Unknown game "{}", see "gosuticker list" for game list'.format(game), err=True)
         return
     try:
         matches = GosuTicker(game).download_matches()
@@ -55,7 +56,7 @@ def tick(game, template, help_template, is_json):
     if is_json:
         click.echo(json.dumps(list(matches), indent=2, sort_keys=True))
         return
-    template = template or DEFAULT_TEMPLATE
+    template = template if template else DEFAULT_TEMPLATE_ALL if game == 'all' else DEFAULT_TEMPLATE
     template = Template(template)
     for m in matches:
         click.echo(template.render(m))
@@ -108,7 +109,7 @@ def notify(game, team, seconds, minutes, pushbullet, pushbullet_key, force):
                         continue
             # notify
             title = "{} vs {} in {}".format(match['t1'], match['t2'], match['time'])
-            body = match['url']
+            body = match.get('stream') or match['url']
             if pushbullet:
                 push = Pushbullet(pushbullet_key)
                 push.push_note(title, body)
