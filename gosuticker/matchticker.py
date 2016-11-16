@@ -1,3 +1,4 @@
+import logging
 import re
 from urllib.parse import urljoin
 
@@ -8,7 +9,9 @@ from gosuticker import Match
 
 
 def parse_time(text):
-    """converts text time to seconds"""
+    """
+    converts text time to seconds
+    """
     if 'live' in text.lower():
         return 0
     text = text.strip().lower()
@@ -18,6 +21,27 @@ def parse_time(text):
     seconds += int((re.findall('(\d+)h', text) or [0])[0]) * 3600
     seconds += int((re.findall('(\d+)m', text) or [0])[0]) * 60
     return seconds
+
+
+def clean_stream_url(url):
+    """
+    Converts various stream embed urls to normal channel urls.
+    :param url: dirty embed url
+    :return: clean channel url
+    """
+    if not url:
+        return url
+    if 'twitch' in url and 'channel=' in url:
+        channel = re.findall('channel=(.+?)(?:&|$)', url)
+        if not channel:
+            logging.error("Couldn't clean stream url: {}".format(url))
+            return url
+        return 'http://twitch.tv/' + channel[0]
+
+    url = url.split('?', 1)[0]
+    url = url.replace('#!/embed/', '')
+    url = url.replace('//embed.', '//')
+    return url
 
 
 class GosuTicker:
@@ -32,6 +56,7 @@ class GosuTicker:
         'all',
     ]
     url_base = "http://www.gosugamers.net/"
+    logger = logging.getLogger('gosuticker')
 
     def __init__(self, game):
         if game not in self.games:
@@ -71,12 +96,7 @@ class GosuTicker:
                 item['stream'] = sel_detailed.xpath("//div[@class='matches-streams']"
                                                     "/span[.//a[re:test(text(),'english', 'i')]]"
                                                     "//iframe/@src").extract_first()
-                item['stream'] = self.clean_stream_url(item['stream'])
+                item['stream'] = clean_stream_url(item['stream'])
             yield item
 
-    @staticmethod
-    def clean_stream_url(url):
-        url = url.split('?', 1)[0]
-        url = url.replace('#!/embed/', '')
-        url = url.replace('//embed.', '//')
-        return url
+
