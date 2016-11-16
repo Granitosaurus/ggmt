@@ -4,7 +4,7 @@ setup(
     name='gosuticker',
     version='0.3',
     packages=['gosuticker'],
-    url='https://github.com/Granitas/gosuticker',
+    url='https://github.com/Granitosaurus/gosuticker',
     license='GPLV3+',
     author='Bernardas Alisauskas',
     author_email='bernardas.alisauskas@gmail.com',
