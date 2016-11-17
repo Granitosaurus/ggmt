@@ -3,7 +3,22 @@
 [![PyPi version](https://img.shields.io/pypi/v/gosuticker.svg?style=flat-square)](https://pypi.python.org/pypi/gosuticker)
 [![PyPi license](https://img.shields.io/pypi/l/gosuticker.svg?style=flat-square)](https://pypi.python.org/pypi/gosuticker)
 [![PyPi license](https://img.shields.io/pypi/pyversions/gosuticker.svg?style=flat-square)](https://pypi.python.org/pypi/gosuticker)   
-A template-based matchticker based on data displayed on gosugamers.com website
+
+Gosuticker is a matchticker command line application for linux that can:
+  * Show current matches.
+  * Notify when matches are about to start. 
+  * Open up streams of ongoing matches.
+
+Try out:
+
+    # display matches:
+    gosuticker tick dota2
+    # or watch matches:
+    gosuticker watch csgo
+    # or notify when match starts:
+    gosuticker notify dota2 na'vi
+
+Gosuticker is also based on jinja2 templates, so the data can be easily customized to display in your format for your website or application.
 
 ```console
 Usage: gosuticker [OPTIONS] COMMAND [ARGS]...
@@ -35,6 +50,14 @@ python3 setup.py install
 
 ### Ticker  
 
+```
+Show matchticker.  
+Options:  
+  -t, --template TEXT  set template  
+  --json               output json  
+  --help               Show this message and exit.  
+```
+
 Matchticker that prints out upcoming/ongoing match data. Prints data to stdout in text or json. Text can be customized by using jinja2 templates.
 
 *examples:*  
@@ -62,19 +85,22 @@ RO vs Poland in 179.0 minutes
 
 
 ### Notifier
-Notify if a specific team plays.
-Options:
-  -f, --force                ignore history
-  -s, --seconds INTEGER      seconds threshold before sending out the
-                             notification (default=900)
-  -m, --minutes INTEGER      minutes threshold before sending out the
-                             notification (default=15)
-  -p, --pushbullet           Use pushbullet notification instead system
-                             notify-send
-  -k, --pushbullet-key TEXT  Pushbullet API key to use to send the
-                             notification, can be set through enviroment
-                             variable PUSHBULLET_API
-  --help                     Show this message and exit.
+
+```
+Notify if a specific team plays.  
+Options:  
+  -f, --force                ignore history  
+  -s, --seconds INTEGER      seconds threshold before sending out the  
+                             notification (default=900)  
+  -m, --minutes INTEGER      minutes threshold before sending out the  
+                             notification (default=15)  
+  -p, --pushbullet           Use pushbullet notification instead system  
+                             notify-send  
+  -k, --pushbullet-key TEXT  Pushbullet API key to use to send the  
+                             notification, can be set through enviroment  
+                             variable PUSHBULLET_API  
+  --help                     Show this message and exit.  
+```
 
 Notify when a match with a specific team playing is about to start using system-notify or [pushbullet][pushbullet] service. Argument `team` is a case insensitive regular expressions fielda.  
 **_Important_**: notification history is stored in `~/.gosuticker_history` to prevent flooding. You can ignore history with a -f/--force flag
@@ -109,17 +135,18 @@ If anyone knows workaround for this please submit and issue or a PR!
 
 ### Watch
 
-Open a stream in browser or media player.
-Options:
-  -s, --show-unavailable  list matches that don't have streams too
-  -t, --template TEXT     set message template
-  -w, --in-window         open stream in window instead of tab(if possible)
-  -l, --use-streamlink    open sing streamlink instead, requires:
-                          https://github.com/streamlink/streamlink
-  -p, --print             just print url instread
-  -q, --quality TEXT      [default:best] open in livestreamer instead
-  --help                  Show this message and exit.
-
+```
+Open a stream in browser or media player.  
+Options:  
+  -s, --show-unavailable  list matches that don't have streams too  
+  -t, --template TEXT     set message template  
+  -w, --in-window         open stream in window instead of tab(if possible)  
+  -l, --use-streamlink    open sing streamlink instead, requires:  
+                          https://github.com/streamlink/streamlink  
+  -p, --print             just print url instread  
+  -q, --quality TEXT      [default:best] open in livestreamer instead  
+  --help                  Show this message and exit.  
+```
 
 This command shows you a list of available streams and opens up a selected one in your browser or default mediaplayer (via use of [sreamlink][streamlink])
 

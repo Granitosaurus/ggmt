@@ -58,11 +58,11 @@ def list_games():
         click.echo(game)
 
 
-@cli.command('tick', help='display matchticker')
+@cli.command('tick', help='Show matchticker.')
 @click.argument('game', type=click.Choice(GosuTicker.games))
 @click.option('-t', '--template', help='set template')
 @click.option('--json', 'is_json', help='output json', is_flag=True)
-def tick(game, template,is_json):
+def tick(game, template, is_json):
     if not game:
         raise click.BadParameter('Missing required parameter "game"')
 
