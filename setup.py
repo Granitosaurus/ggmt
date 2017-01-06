@@ -1,14 +1,14 @@
 from setuptools import setup
 
 setup(
-    name='gosuticker',
-    version='0.5',
-    packages=['gosuticker'],
-    url='https://github.com/Granitosaurus/gosuticker',
+    name='ggmt',
+    version='0.8',
+    packages=['ggmt'],
+    url='https://github.com/Granitosaurus/ggmt',
     license='GPLV3+',
-    author='Bernardas Alisauskas',
+    author='Bernardas Ališauskas',
     author_email='bernardas.alisauskas@gmail.com',
-    description='matchticker for gosugamers',
+    description='Good Game Match Ticker - command line application for tracking matches of various e-sport games',
     install_requires=[
         'click',
         'requests',
@@ -17,7 +17,7 @@ setup(
     ],
     entry_points="""
         [console_scripts]
-        gosuticker=gosuticker.cli:cli
+        ggmt=ggmt.cli:cli
     """,
     classifiers=[
         "Development Status :: 4 - Beta",

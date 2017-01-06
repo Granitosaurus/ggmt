@@ -1,27 +1,46 @@
-# Gosuticker
+# Good Game Match Ticker
 
-[![PyPi version](https://img.shields.io/pypi/v/gosuticker.svg?style=flat-square)](https://pypi.python.org/pypi/gosuticker)
-[![PyPi license](https://img.shields.io/pypi/l/gosuticker.svg?style=flat-square)](https://pypi.python.org/pypi/gosuticker)
-[![PyPi license](https://img.shields.io/pypi/pyversions/gosuticker.svg?style=flat-square)](https://pypi.python.org/pypi/gosuticker)   
+[![PyPi version](https://img.shields.io/pypi/v/ggmt.svg?style=flat-square)](https://pypi.python.org/pypi/ggmt)
+[![PyPi license](https://img.shields.io/pypi/l/ggmt.svg?style=flat-square)](https://pypi.python.org/pypi/ggmt)
+[![PyPi license](https://img.shields.io/pypi/pyversions/ggmt.svg?style=flat-square)](https://pypi.python.org/pypi/ggmt)   
 
-Gosuticker is a matchticker command line application for linux that can:
-  * Show current matches.
+ggmt is a match ticker command line application for linux that can:
+  * Show live and upcoming esport matches.
   * Notify when matches are about to start. 
   * Open up streams of ongoing matches.
+  * Show recap/results of latest matches
+  
+It's designed with templating in mind so it can be used to produce match tickers for your applications or websites.  
+
+    Usage: ggmt [OPTIONS] COMMAND [ARGS]...
+      Good Game Match Ticker - cli application for tracking match information
+      for various esport games.
+
+    Options:
+      --version        Show the version and exit.
+      --help-template  Show help message for how to format template
+      --help           Show this message and exit.
+
+    Commands:
+      list    List supported games.
+      notify  Notify if a specific team plays.
+      recap   Show match history.
+      tick    Show matchticker.
+      watch   Open a stream in browser or media player(via streamlink).
 
 Try out:
 
     # display matches:
-    gosuticker tick dota2
+    ggmt tick dota2
     # or watch matches:
-    gosuticker watch csgo
+    ggmt watch csgo
     # or notify when match starts:
-    gosuticker notify dota2 na'vi
+    ggmt notify dota2 na'vi
 
-Gosuticker is also based on jinja2 templates, so the data can be easily customized to display in your format for your website or application.
+ggmt is also based on jinja2 templates, so the data can be easily customized to display in your format for your website or application.
 
 ```console
-Usage: gosuticker [OPTIONS] COMMAND [ARGS]...
+Usage: ggmt [OPTIONS] COMMAND [ARGS]...
 Commands:
   list    list support games
   notify  notify if a specific team plays
@@ -33,16 +52,16 @@ Commands:
 Via pip:
 
 ```console
-pip install gosuticker
+pip install ggmt
 # or
-pip istall git+https://github.com/Granitas/gosuticker.git
+pip istall git+https://github.com/Granitas/ggmt.git
 ```
 
 Or 
 
 ```console
-git clone https://github.com/Granitas/gosuticker.git
-cd gosuticker
+git clone https://github.com/Granitas/ggmt.git
+cd ggmt
 python3 setup.py install
 ```
 
@@ -64,7 +83,7 @@ Matchticker that prints out upcoming/ongoing match data. Prints data to stdout i
 Simply supply game name as first argument
 
 ```console
-$ gosuticker tick dota2
+$ ggmt tick dota2
 DUOBAO vs Taring in Live
 NGE vs AcA in Live
 El_one vs TBE in 3m 38s
@@ -74,7 +93,7 @@ Elements. vs Sweet. in 1w 2h
 You can use a full custom jinja2 template (see --help-template for template keys)
 
 ```console
-$ gosuticker tick dota2 --template "{{t1_country_short}} vs {{t2_country}} in {{time_secs/60}} minutes"
+$ ggmt tick dota2 --template "{{t1_country_short}} vs {{t2_country}} in {{time_secs/60}} minutes"
 RS vs Europe in 0.0 minutes
 RU vs Russian Federation in 0.0 minutes
 CN vs Malaysia in 0.0 minutes
@@ -103,19 +122,19 @@ Options:
 ```
 
 Notify when a match with a specific team playing is about to start using system-notify or [pushbullet][pushbullet] service. Argument `team` is a case insensitive regular expressions fielda.  
-**_Important_**: notification history is stored in `~/.gosuticker_history` to prevent flooding. You can ignore history with a -f/--force flag
+**_Important_**: notification history is stored in `~/.ggmt_history` to prevent flooding. You can ignore history with a -f/--force flag
 
 Example:
 
 Notify 30 minutes before game starts
 ```console
-$ gosuticker notify dota2 na`vi --minutes 30
+$ ggmt notify dota2 na`vi --minutes 30
 ```
 
 Notify via pushbullet when live
 ```console
 $ export PUSHBULLET_API=<api_key>
-$ gosuticker notify dota2 na`vi --seconds 0 --pushbullet
+$ ggmt notify dota2 na`vi --seconds 0 --pushbullet
 ```
 
 #### Using With Cron
@@ -123,7 +142,7 @@ $ gosuticker notify dota2 na`vi --seconds 0 --pushbullet
 Of course notifier is only useful if it is checking constantly. To do that you can use cron services via `crontab -e` command on linux, add this crontab: 
 
 ```cron
-*/10 * * * * /usr/bin/gosuticker notify dota2 na`vi --minutes 5
+*/10 * * * * /usr/bin/ggmt notify dota2 na`vi --minutes 5
 ```
 
 This will check for na'vi games every 10 minutes.
@@ -152,7 +171,7 @@ This command shows you a list of available streams and opens up a selected one i
 
 Example:
 ```console
-    $ gosuticker watch dota2
+    $ ggmt watch dota2
     0: CDEC vs FTD.C in Live @ http://twitch.tv/esl_joindotablue
     1: Na'vi vs Alliance in Live @ http://twitch.tv/justkidding
     ------------------------------------------------------------

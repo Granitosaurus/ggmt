@@ -9,18 +9,25 @@ import click
 from jinja2 import Template
 from requests.exceptions import ConnectionError
 
-from gosuticker import Match
-from gosuticker.matchticker import GosuTicker
+from ggmt import Match
+from ggmt.matchticker import GosuTicker
+
+COLOR_ENABLED = True
+try:
+    from colorama import Fore, Back
+except ImportError:
+    COLOR_ENABLED = False
 
 DEFAULT_TEMPLATE = "{{t1}} vs {{t2}} in {{time}} {% if stream %}@ {{stream}}{% endif %}"
 DEFAULT_TEMPLATE_ALL = "{{game}}: {{t1}} vs {{t2}} in {{time}} {% if stream %}@ {{stream}}{% endif %}"
-HISTORY_LOCATION = os.path.expanduser('~/.gosuticker_history')
+DEFAULT_TEMPLATE_RECAP = "{{t1}} {{t1_score}}:{{t2_score}} {{t2}}"
+HISTORY_LOCATION = os.path.expanduser('~/.ggmt_history')
 with open(HISTORY_LOCATION, 'a') as f:  # make sure history file exists
     pass
 
 
 def download_matches(game):
-    """little wrapper for connections errors that might be caused during match download"""
+    """wrapper for connections errors that might be caused during match download"""
     try:
         matches = GosuTicker(game).download_matches()
     except ConnectionError:
@@ -28,6 +35,22 @@ def download_matches(game):
     except ConnectionRefusedError as e:
         sys.exit('Cannot connect to gosugamers: {}'.format(e.args[-1]))
     return matches
+
+
+def download_history(game):
+    """wrapper for connections errors that might be caused during match download"""
+    try:
+        matches = GosuTicker(game).download_history()
+    except ConnectionError:
+        sys.exit('ERROR: No internet connection')
+    except ConnectionRefusedError as e:
+        sys.exit('Cannot connect to gosugamers: {}'.format(e.args[-1]))
+    return matches
+
+
+def print_match(match, template):
+    """wrapper to inject colorama colors to template"""
+    click.echo(template.render(match, Fore=Fore, Back=Back))
 
 
 def print_help_template(ctx, param, value):
@@ -49,10 +72,11 @@ def print_help_template(ctx, param, value):
 @click.option('--help-template', help='Show help message for how to format template',
               is_flag=True, is_eager=True, expose_value=True, callback=print_help_template)
 def cli(help_template):
+    """Good Game Match Ticker - cli application for tracking match information for various esport games."""
     pass
 
 
-@cli.command('list', help='list support games')
+@cli.command('list', help='List supported games.')
 def list_games():
     for game in GosuTicker.games:
         click.echo(game)
@@ -73,10 +97,40 @@ def tick(game, template, is_json):
     template = template if template else DEFAULT_TEMPLATE_ALL if game == 'all' else DEFAULT_TEMPLATE
     template = Template(template)
     for m in matches:
-        click.echo(template.render(m))
+        if COLOR_ENABLED and m['time_secs'] == 0:
+            m['time'] = Fore.GREEN + m['time'] + Fore.RESET
+        print_match(m, template)
 
 
-@cli.command('watch', help='Open a stream in browser or media player.')
+@cli.command('recap', help='Show match history.')
+@click.argument('game', type=click.Choice(GosuTicker.games))
+@click.option('-nc', '--no-color', help='disable color being added', is_flag=True)
+@click.option('-t', '--template', help='set template')
+@click.option('--json', 'is_json', help='output json', is_flag=True)
+def tick(game, template, is_json, no_color):
+    if not game:
+        raise click.BadParameter('Missing required parameter "game"')
+
+    matches = download_history(game)
+    if is_json:
+        click.echo(json.dumps(list(matches), indent=2, sort_keys=True))
+        return
+    template = template if template else DEFAULT_TEMPLATE_RECAP
+    template = Template(template)
+    for m in matches:
+        if no_color or not COLOR_ENABLED:  # if color is disabled just stdout
+            print_match(m, template)
+            continue
+        if m['t1_score'] > m['t2_score']:
+            m['t1'] = Fore.GREEN + m['t1'] + Fore.RESET
+            m['t2'] = Fore.RED + m['t2'] + Fore.RESET
+        else:
+            m['t2'] = Fore.GREEN + m['t2'] + Fore.RESET
+            m['t1'] = Fore.RED + m['t1'] + Fore.RESET
+        print_match(m, template)
+
+
+@cli.command('watch', help='Open a stream in browser or media player(via streamlink).')
 @click.argument('game')
 @click.option('-s', '--show-unavailable', 'show', is_flag=True,
               help="list matches that don't have streams too")
@@ -85,9 +139,9 @@ def tick(game, template, is_json):
 @click.option('-w', '--in-window', is_flag=True,
               help='open stream in window instead of tab(if possible)')
 @click.option('-l', '--use-streamlink', is_flag=True,
-              help='open sing streamlink instead, requires: https://github.com/streamlink/streamlink')
-@click.option('-p', '--print', 'just_print', is_flag=True, help='just print url instread')
-@click.option('-q', '--quality', help='[default:best] open in livestreamer instead', default='best')
+              help='open using streamlink instead, requires: https://github.com/streamlink/streamlink')
+@click.option('-p', '--print', 'just_print', is_flag=True, help='just print url instead')
+@click.option('-q', '--quality', help='[default:best] quality when using streamlink', default='best')
 def watch(game, show, template, in_window, use_streamlink, quality, just_print):
     matches = list(download_matches(game))
     if not show:
@@ -170,7 +224,7 @@ def notify(game, team, seconds, minutes, pushbullet, pushbullet_key, force):
             # already in history?
             if not force:
                 with open(HISTORY_LOCATION, 'r') as f:
-                    if match['id'] in f.read():
+                    if match.id in f.read():
                         continue
             # notify
             title = "{} vs {} in {}".format(match['t1'], match['t2'], match['time'])
@@ -188,4 +242,4 @@ def notify(game, team, seconds, minutes, pushbullet, pushbullet_key, force):
                                 shell=True)
             # add to history
             with open(HISTORY_LOCATION, 'a') as f:
-                f.write('{}\n'.format(match['id']))
+                f.write('{}\n'.format(match.id))
