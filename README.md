@@ -28,14 +28,9 @@ It's designed with templating in mind so it can be used to produce match tickers
       tick    Show matchticker.
       watch   Open a stream in browser or media player(via streamlink).
 
-Try out:
+Screenshots:  
 
-    # display matches:
-    ggmt tick dota2
-    # or watch matches:
-    ggmt watch csgo
-    # or notify when match starts:
-    ggmt notify dota2 na'vi
+![preview](https://github.com/Granitosaurus/ggmt/raw/master/screenshot.png)
 
 ggmt is also based on jinja2 templates, so the data can be easily customized to display in your format for your website or application.
 
