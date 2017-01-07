@@ -50,8 +50,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'ggmt'
-copyright = '2017, Bernardas Ališauskas'
-author = 'Bernardas Ališauskas'
+copyright = u'2017, Bernardas Ališauskas'
+author = u'Bernardas Ališauskas'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
