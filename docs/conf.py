@@ -131,7 +131,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'ggmt.tex', 'ggmt Documentation',
-     'Bernardas Ališauskas', 'manual'),
+     u'Bernardas Ališauskas', 'manual'),
 ]
 
 
