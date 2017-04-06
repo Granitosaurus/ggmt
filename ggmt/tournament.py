@@ -1,8 +1,8 @@
 from urllib.parse import urljoin
 
 import requests
+import sys
 from parsel.selector import Selector
-from terminalbrackets import Team, Bracket
 
 from ggmt import Event
 
@@ -68,6 +68,10 @@ class LiquidBracketDownloader:
         Experimental
         Download and display brackets in the terminal
         """
+        try:
+            from terminalbrackets import Team, Bracket
+        except ImportError:
+            sys.exit('For brackets functionality "terminalbrackets" package is required')
         resp = requests.get(url)
         sel = Selector(text=resp.text)
 
