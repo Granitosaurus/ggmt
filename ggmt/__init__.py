@@ -1,7 +1,21 @@
 from collections import OrderedDict
 
 
-class Match(dict):
+class StrictDict(dict):
+    keys = []
+    keys = OrderedDict(keys)
+
+    def __setitem__(self, key, value):
+        if key in self.keys:
+            super().__setitem__(key, value)
+        else:
+            raise NotImplementedError('Unknown key {}'.format(key))
+
+    def __setattr__(self, key, value):
+        raise NotImplementedError("use {}['key'] to set attributes".format(self.__name__))
+
+
+class Match(StrictDict):
     """
     Storage object for storing esport games match data.
     See Match.keys for available keys
@@ -26,15 +40,14 @@ class Match(dict):
 
     @property
     def id(self):
-        return "{}_{}_{}".format(self['id'], self['t1'] , self['t2'])
-
-    def __setitem__(self, key, value):
-        if key in self.keys:
-            super().__setitem__(key, value)
-        else:
-            raise NotImplementedError('Unknown key {}'.format(key))
-
-    def __setattr__(self, key, value):
-        raise NotImplementedError("use Match['key'] to set attributes")
+        return "{}_{}_{}".format(self['id'], self['t1'], self['t2'])
 
 
+class Event(StrictDict):
+    keys = [
+        ('name', 'tournament name'),
+        ('date', 'when tournament was on going'),
+        ('url', 'url to liquidpedia page'),
+        ('info', 'information about tournament'),
+    ]
+    keys = OrderedDict(keys)
