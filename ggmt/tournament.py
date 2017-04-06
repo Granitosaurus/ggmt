@@ -89,8 +89,3 @@ class LiquidBracketDownloader:
         print(xtr_brackets)
         return xtr_brackets
 
-
-if __name__ == '__main__':
-    # brackets = download_brackets('http://wiki.teamliquid.net/dota2/Dota2_ACE/Provisional')
-    dl = LiquidBracketDownloader('dota2')
-    ts = dl.find_tournaments()
