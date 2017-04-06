@@ -31,12 +31,14 @@ class LiquidBracketDownloader:
             game = ''
         self.game_url = self.url_base + game
 
-    def find_tournaments(self, category=EVENT_CURRENT):
+    def find_tournaments(self, category=None):
         """
         :param category: what category to show,
             choice from: EVENT_CURRENT[default], EVENT_PAST, EVENT_FUTURE
         :return: list of Events
         """
+        if category is None:
+            category = EVENT_CURRENT
         resp = requests.get(self.game_url)
         sel = Selector(text=resp.text)
         ongoing_events = sel.xpath("//li[contains(text(),'{}')]/..//a".format(category))

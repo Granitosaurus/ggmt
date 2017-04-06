@@ -259,11 +259,12 @@ def tournament(game, past, future, bracket, as_json, all_):
         cat = EVENT_PAST if past else None
         cat = EVENT_FUTURE if future else cat
         events = dl.find_tournaments(category=cat)
-
     if as_json:
         click.echo(json.dumps(events, indent=2))
         return
-
+    if not events:
+        click.echo('No events found :(')
+        return
     max_len = len(sorted([e['name'] for e in events], key=lambda s: len(s), reverse=True)[0])
     longest = 0
     for i, event in enumerate(events):
