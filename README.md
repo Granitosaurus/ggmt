@@ -9,10 +9,13 @@ ggmt is a match ticker command line application for linux that can:
   * Notify when matches are about to start. 
   * Open up streams of ongoing matches.
   * Show recap/results of latest matches
+  * Show information about tournaments
   
 It's designed with templating in mind so it can be used to produce match tickers for your applications or websites.  
 
+    $ ggmt --help
     Usage: ggmt [OPTIONS] COMMAND [ARGS]...
+
       Good Game Match Ticker - cli application for tracking match information
       for various esport games.
 
@@ -22,13 +25,13 @@ It's designed with templating in mind so it can be used to produce match tickers
       --help           Show this message and exit.
 
     Commands:
-      list    List supported games.
-      notify  Notify if a specific team plays.
-      recap   Show match history.
-      tick    Show matchticker.
-      watch   Open a stream in browser or media player(via streamlink).
+      notify      Notify if a specific team plays.
+      recap       Show match history.
+      tick        Show matchticker.
+      tournament  display tournament brackets, default: current...
+      watch       Open a stream in browser or media player(via...
 
-Screenshots:  
+Screenshots:
 
 ![preview](https://github.com/Granitosaurus/ggmt/raw/master/screenshot.png)
 
@@ -174,6 +177,23 @@ Example:
     Opening http://twitch.tv/esl_joindotablue...
 ```
 
+### Tournament
+
+```console
+Usage: ggmt tournament [OPTIONS] GAME
+
+  display tournament brackets, default: current tournaments
+
+Options:
+  -p, --past     show past tournaments
+  -a, --all      show all tournaments
+  -f, --future   show future tournaments
+  -b, --bracket  show brackets (experimental)
+  -j, --json     output json
+  --help         Show this message and exit.
+```
+
+This command shows information about current/future/past tournaments.
 
 [streamlink]: https://github.com/streamlink/streamlink
 [pushbullet]: https://www.pushbullet.com/
