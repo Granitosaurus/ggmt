@@ -127,7 +127,7 @@ def tick(game, template, is_json, no_color):
 
 
 @cli.command('watch', help='Open a stream in browser or media player(via streamlink).')
-@click.argument('game')
+@click.argument('game', type=click.Choice(GosuTicker.games))
 @click.option('-s', '--show-unavailable', 'show', is_flag=True,
               help="list matches that don't have streams too")
 @click.option('-t', '--template',
@@ -243,7 +243,7 @@ def notify(game, team, seconds, minutes, pushbullet, pushbullet_key, force):
 
 
 @cli.command('tournament', help='display tournament brackets, default: current tournaments')
-@click.argument('game')
+@click.argument('game', type=click.Choice(GosuTicker.games))
 @click.option('-p', '--past', help='show past tournaments', is_flag=True)
 @click.option('-a', '--all', 'all_', help='show all tournaments', is_flag=True)
 @click.option('-f', '--future', help='show future tournaments', is_flag=True)
