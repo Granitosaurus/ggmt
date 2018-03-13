@@ -1,5 +1,7 @@
 import logging
 import re
+from datetime import timedelta, datetime
+from typing import Generator, List
 from urllib.parse import urljoin
 
 import requests
@@ -68,30 +70,37 @@ class GosuTicker:
         if game == 'all':
             game = ''
         self.game_url = self.url_base + game
+        self.session = requests.session()
 
-    def download_matches(self):
+    def download_matches(self, crawl_stream: bool = True) -> List[Match]:
         """
         Downloads live and upcoming matches.
         :return: list of eticker.Match objects
         """
-        resp = requests.get(self.game_url)
+        resp = self.session.get(self.game_url)
         if resp.status_code != 200:
             raise ConnectionRefusedError('Got response error {}'.format(resp.status_code))
         sel = Selector(text=resp.text)
-        return self.find_matches(sel)
+        matches = list(self.find_matches(sel))
+        if crawl_stream:
+            matches = self.update_match_streams(matches)
+        return matches
 
-    def download_history(self):
+    def download_history(self, crawl_stream: bool = True) -> List[Match]:
         """
         Downloads recent matches.
         :return: list of eticker.Match objects
         """
-        resp = requests.get('{}/gosubet'.format(self.game_url))
+        resp = self.session.get('{}/gosubet'.format(self.game_url))
         if resp.status_code != 200:
             raise ConnectionRefusedError('Got response error {}'.format(resp.status_code))
         sel = Selector(text=resp.text)
-        return self.find_history(sel)
+        matches = list(self.find_history(sel))
+        if crawl_stream:
+            matches = self.update_match_streams(matches)
+        return matches
 
-    def _find_match(self, sel):
+    def _find_match(self, sel: Selector) -> Match:
         xpath = lambda x: sel.xpath(x).extract_first(default='').strip()
         item = Match()
         item['url'] = urljoin(self.url_base, xpath(".//a/@href"))
@@ -99,6 +108,7 @@ class GosuTicker:
         item['game'] = next((g for g in self.games if g in item['url'].lower()))
         item['time'] = xpath("td[@class='status']/span/text()")
         item['time_secs'] = parse_time(item['time'])
+        item['timestamp'] = int((datetime.now() + timedelta(item['time_secs'])).timestamp())
         item['t1'] = xpath(".//span[contains(@class,'opp1')]/span/text()")
         item['t1_country'] = xpath(".//span[contains(@class,'opp1')]/span[contains(@class,'flag')]/@title")
         item['t1_country_short'] = xpath(".//span[contains(@class,'opp1')]"
@@ -112,7 +122,22 @@ class GosuTicker:
         item['t2_score'] = scores[1] if len(scores) > 1 else None
         return item
 
-    def find_matches(self, sel):
+    def update_match_streams(self, matches: List[Match]) -> List[Match]:
+        """Populate Match objects with stream urls"""
+        updated = []
+        for item in matches:
+            # Populate stream data if match is live
+            if not item['time_secs']:
+                resp = self.session.get(item['url'])
+                sel_detailed = Selector(text=resp.text)
+                item['stream'] = sel_detailed.xpath("//div[@class='matches-streams']"
+                                                    "/span[.//a[re:test(text(),'english', 'i')]]"
+                                                    "//iframe/@src").extract_first()
+                item['stream'] = clean_stream_url(item['stream'])
+            updated.append(item)
+        return updated
+
+    def find_matches(self, sel: Selector) -> Generator[Match, None, None]:
         """
         Generator to find live and upcoming matches in parsel.Selector object
         :returns: yields eticker.Match objects
@@ -120,17 +145,9 @@ class GosuTicker:
         matches = sel.xpath("//table[@id='gb-matches']//tr")
         for match in matches:
             item = self._find_match(match)
-            # Populate stream data if match is live
-            if not item['time_secs']:
-                resp = requests.get(item['url'])
-                sel_detailed = Selector(text=resp.text)
-                item['stream'] = sel_detailed.xpath("//div[@class='matches-streams']"
-                                                    "/span[.//a[re:test(text(),'english', 'i')]]"
-                                                    "//iframe/@src").extract_first()
-                item['stream'] = clean_stream_url(item['stream'])
             yield item
 
-    def find_history(self, sel):
+    def find_history(self, sel: Selector) -> Generator[Match, None, None]:
         """
         Generator to find recent matches in parsel.Selector object
         :returns: yields eticker.Match objects
@@ -139,6 +156,4 @@ class GosuTicker:
         for match in matches:
             item = self._find_match(match)
             yield item
-
-
 

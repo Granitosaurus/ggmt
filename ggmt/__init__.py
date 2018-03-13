@@ -26,6 +26,7 @@ class Match(StrictDict):
         ('game', 'game name'),
         ('time', 'time in text as displayed on gosugamers'),
         ('time_secs', 'time in integer seconds'),
+        ('timestamp', 'UNIX timestamp of when the game is starting'),
         ('t1', 'name of team 1'),
         ('t1_country', 'country of team 1'),
         ('t1_country_short', 'short version of country of team 1'),
