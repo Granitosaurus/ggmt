@@ -13,7 +13,8 @@ setup(
         'click',
         'requests',
         'parsel',
-        'jinja2'
+        'jinja2',
+        'colorama'
     ],
     entry_points="""
         [console_scripts]
