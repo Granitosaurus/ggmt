@@ -5,12 +5,12 @@ from typing import Generator, List
 from urllib.parse import urljoin
 
 import requests
-from parsel import Selector
+from parsel import Selector, SelectorList
 
 from ggmt import Match
 
 
-def parse_time(text):
+def time_to_seconds(text: str) -> int:
     """
     converts text time to seconds
     :returns: seconds integer
@@ -26,7 +26,7 @@ def parse_time(text):
     return seconds
 
 
-def clean_stream_url(url):
+def clean_stream_url(url: str) -> str:
     """
     Converts various stream embed urls to normal channel urls.
     :param url: dirty embed url
@@ -75,7 +75,7 @@ class GosuTicker:
     def download_matches(self, crawl_stream: bool = True) -> List[Match]:
         """
         Downloads live and upcoming matches.
-        :return: list of eticker.Match objects
+        :return: list of Match objects
         """
         resp = self.session.get(self.game_url)
         if resp.status_code != 200:
@@ -89,7 +89,7 @@ class GosuTicker:
     def download_history(self, crawl_stream: bool = True) -> List[Match]:
         """
         Downloads recent matches.
-        :return: list of eticker.Match objects
+        :return: list of Match objects
         """
         resp = self.session.get('{}/gosubet'.format(self.game_url))
         if resp.status_code != 200:
@@ -107,7 +107,7 @@ class GosuTicker:
         item['id'] = (re.findall('matches/(\d+)', item['url']) or [None])[0]
         item['game'] = next((g for g in self.games if g in item['url'].lower()))
         item['time'] = xpath("td[@class='status']/span/text()")
-        item['time_secs'] = parse_time(item['time'])
+        item['time_secs'] = time_to_seconds(item['time'])
         item['timestamp'] = int((datetime.now() + timedelta(item['time_secs'])).timestamp())
         item['t1'] = xpath(".//span[contains(@class,'opp1')]/span/text()")
         item['t1_country'] = xpath(".//span[contains(@class,'opp1')]/span[contains(@class,'flag')]/@title")
@@ -137,23 +137,26 @@ class GosuTicker:
             updated.append(item)
         return updated
 
+    def _find_matches(self, sel: SelectorList):
+        """
+        Base match finder method
+        :param sel: html Selector of match region
+        :return: Generator Matches
+        """
+        for match in sel:
+            item = self._find_match(match)
+            yield item
+
     def find_matches(self, sel: Selector) -> Generator[Match, None, None]:
         """
         Generator to find live and upcoming matches in parsel.Selector object
-        :returns: yields eticker.Match objects
+        :returns: Generator for Match objects
         """
-        matches = sel.xpath("//table[@id='gb-matches']//tr")
-        for match in matches:
-            item = self._find_match(match)
-            yield item
+        yield from self._find_matches(sel.xpath("//table[@id='gb-matches']//tr"))
 
     def find_history(self, sel: Selector) -> Generator[Match, None, None]:
         """
         Generator to find recent matches in parsel.Selector object
-        :returns: yields eticker.Match objects
+        :returns: Generator for Match objects
         """
-        matches = sel.xpath("//h2[contains(text(),'Recent')]/..//tr")
-        for match in matches:
-            item = self._find_match(match)
-            yield item
-
+        yield from self._find_matches(sel.xpath("//h2[contains(text(),'Recent')]/..//tr"))
